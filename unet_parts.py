@@ -28,12 +28,12 @@ class DownScale(nn.Module):
 
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.maxpool = nn.MaxPool2d(2)
+        self.maxpool = nn.MaxPool2d(2, return_indices=True)
         self.conv = DoubleConv(in_channels, out_channels)
 
     def forward(self, x):
-        x = self.conv(x)
-        return self.maxpool(x)
+        x, idx = self.conv(x)
+        return self.maxpool(x), idx
 
 
 class Up(nn.Module):
@@ -59,6 +59,15 @@ class Up(nn.Module):
 
 
 class OutConv(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(OutConv, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1)
+
+    def forward(self, x):
+        return self.conv(x)
+
+
+class MaxUnpool(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(OutConv, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1)
